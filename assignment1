@@ -1,0 +1,52 @@
+import Foundation
+
+//  Step 1: Personal Information
+
+var firstName: String = "Aizhan"
+var lastName: String = "Mukhametzhan"
+
+var birthYear: Int = 2006
+let currentYear: Int = 2026
+var age: Int = currentYear - birthYear
+
+var isStudent: Bool = true
+var height: Double = 1.55
+
+var favoriteCity: String = "Almaty"
+var favoriteFood: String = "besh"
+
+
+//  Step 2: Hobbies and Interests
+
+var hobby: String = "nail art"
+var numberOfHobbies: Int = 4
+var favoriteNumber: Int = 6
+var isHobbyCreative: Bool = true
+
+var favoriteSport: String = "tennis"
+var favoriteColor: String = "red"
+
+
+//  Bonus: Future Goals
+
+var futureGoals: String = "I want to build a successful career in auditing or cybersecurity."
+
+
+//  Step 3: Create Life Story
+
+let lifeStory = """
+My name is \(firstName) \(lastName).
+I am \(age) years old, born in \(birthYear).
+I am currently a student: \(isStudent).
+My height is \(height) meters.
+I live in \(favoriteCity), and my favorite food is \(favoriteFood).
+I enjoy \(hobby), which is a creative hobby: \(isHobbyCreative).
+I have \(numberOfHobbies) hobbies in total, and my favorite number is \(favoriteNumber).
+My favorite sport is \(favoriteSport), and my favorite color is \(favoriteColor).
+In the future, \(futureGoals)
+"""
+
+
+// Step 4: Print Life Story
+
+print(lifeStory)
