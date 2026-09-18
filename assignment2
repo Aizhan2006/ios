@@ -1,0 +1,87 @@
+import Foundation
+
+// 1
+let fruits = ["Apple", "Banana", "Orange", "Mango", "Grapes"]
+print("Third fruit:", fruits[2])
+
+
+// 2
+var favoriteNumbers: Set<Int> = [7, 13, 21, 42]
+favoriteNumbers.insert(99)
+print("Updated favorite numbers:", favoriteNumbers)
+
+
+// 3
+let programmingLanguages: [String: Int] = [
+    "Python": 1991,
+    "Java": 1995,
+    "Swift": 2014
+]
+print("Swift release year:", programmingLanguages["Swift"]!)
+
+
+// 4
+var colors = ["Red", "Blue", "Green", "Yellow"]
+colors[1] = "Purple"
+print("Updated colors:", colors)
+
+
+
+
+// 1. 
+let firstSet: Set<Int> = [1, 2, 3, 4]
+let secondSet: Set<Int> = [3, 4, 5, 6]
+
+let intersection = firstSet.intersection(secondSet)
+print("Intersection:", intersection)
+
+
+// 2
+var studentScores: [String: Int] = [
+    "Alice": 85,
+    "Bob": 90,
+    "Charlie": 78
+]
+
+studentScores.updateValue(95, forKey: "Bob")
+print("Updated student scores:", studentScores)
+
+
+// 3
+let firstArray = ["apple", "banana"]
+let secondArray = ["cherry", "date"]
+
+let mergedArray = firstArray + secondArray
+print("Merged array:", mergedArray)
+
+
+
+// 1.
+var countryPopulations: [String: Int] = [
+    "Kazakhstan": 20000000,
+    "USA": 340000000,
+    "Japan": 123000000
+]
+
+countryPopulations["Canada"] = 40000000
+print("Updated country populations:", countryPopulations)
+
+
+// 2
+let animals1: Set<String> = ["cat", "dog"]
+let animals2: Set<String> = ["dog", "mouse"]
+
+let unionSet = animals1.union(animals2)
+let finalSet = unionSet.subtracting(animals2)
+
+print("Final set:", finalSet)
+
+
+// 3
+let studentGrades: [String: [Int]] = [
+    "Alice": [85, 90, 88],
+    "Bob": [78, 82, 91],
+    "Charlie": [92, 87, 95]
+]
+
+print("Alice's second grade:", studentGrades["Alice"]![1])
