@@ -1,0 +1,391 @@
+// MARK: Level 1
+
+func parseReading(_ raw: String) -> Reading? {
+    guard let parts = splitOnce(raw, by: ":"),
+          !parts.0.isEmpty,
+          let number = Int(parts.1),
+          number >= 0 || parts.0 == "TEMP" else {
+        return nil
+    }
+
+    return (parts.0, number)
+}
+
+
+func parseLog(_ lines: [String]) -> (valid: [Reading], invalidCount: Int) {
+    var valid: [Reading] = []
+    var invalid = 0
+
+    for line in lines {
+        if let reading = parseReading(line) {
+            valid.append(reading)
+        } else {
+            invalid += 1
+        }
+    }
+
+    return (valid, invalid)
+}
+
+let log = parseLog(rawLog)
+let A = log.invalidCount
+
+print(parseReading("O2:87") as Any)
+print(parseReading("RAD:-1") as Any)
+print("A =", A)
+
+
+// MARK: Level 2
+
+func select(_ readings: [Reading],
+            where isIncluded: (Reading) -> Bool) -> [Reading] {
+    var result: [Reading] = []
+
+    for reading in readings {
+        if isIncluded(reading) {
+            result.append(reading)
+        }
+    }
+
+    return result
+}
+
+
+func values(of readings: [Reading]) -> [Int] {
+    var result: [Int] = []
+
+    for reading in readings {
+        result.append(reading.value)
+    }
+
+    return result
+}
+
+
+let oxygenReadings = select(log.valid) {
+    $0.sensor == "O2"
+}
+
+let oxygenValues = values(of: oxygenReadings)
+
+print("O2:", oxygenReadings)
+print("O2 values:", oxygenValues)
+
+
+func stats(of values: [Int]) -> (min: Int, max: Int, average: Double)? {
+    guard let first = values.first else {
+        return nil
+    }
+
+    var min = first
+    var max = first
+    var sum = 0
+
+    for number in values {
+        if number < min {
+            min = number
+        }
+
+        if number > max {
+            max = number
+        }
+
+        sum += number
+    }
+
+    let average = Double(sum) / Double(values.count)
+
+    return (min, max, average)
+}
+
+
+func stats(_ values: Int...) -> (min: Int, max: Int, average: Double)? {
+    stats(of: values)
+}
+
+
+var B = 0
+
+if let result = stats(of: oxygenValues) {
+    B = Int(result.average)
+}
+
+print(stats(3, 8, 1) as Any)
+print(stats() as Any)
+print("B =", B)
+
+
+// Closure Ladder
+
+let sort1 = log.valid.sorted(by: {
+    (a: Reading, b: Reading) -> Bool in
+    return a.value > b.value
+})
+
+let sort2 = log.valid.sorted(by: {
+    a, b in
+    return a.value > b.value
+})
+
+let sort3 = log.valid.sorted(by: {
+    a, b in
+    a.value > b.value
+})
+
+let sort4 = log.valid.sorted(by: {
+    $0.value > $1.value
+})
+
+let sort5 = log.valid.sorted {
+    $0.value > $1.value
+}
+
+func same(_ a: [Reading], _ b: [Reading]) -> Bool {
+    if a.count != b.count {
+        return false
+    }
+
+    for i in 0..<a.count {
+        if a[i].sensor != b[i].sensor || a[i].value != b[i].value {
+            return false
+        }
+    }
+
+    return true
+}
+
+print(same(sort1, sort2))
+print(same(sort2, sort3))
+print(same(sort3, sort4))
+print(same(sort4, sort5))
+
+
+// MARK: Level 3
+
+func heatUp(_ t: Int) -> Int {
+    return t + 5
+}
+
+func coolDown(_ t: Int) -> Int {
+    return t - 3
+}
+
+func hold(_ t: Int) -> Int {
+    return t
+}
+
+
+func chooseProtocol(for temp: Int) -> (Int) -> Int {
+    if temp < 18 {
+        return heatUp
+    }
+
+    if temp > 24 {
+        return coolDown
+    }
+
+    return hold
+}
+
+
+func runUntilStable(from start: Int,
+                    maxSteps: Int = 10)
+-> (finalTemp: Int, steps: Int, isStable: Bool) {
+
+    var temp = start
+    var steps = 0
+
+    while (temp < 18 || temp > 24) && steps < maxSteps {
+        let action = chooseProtocol(for: temp)
+        temp = action(temp)
+        steps += 1
+    }
+
+    let stable = temp >= 18 && temp <= 24
+
+    return (temp, steps, stable)
+}
+
+print(runUntilStable(from: 31))
+print(runUntilStable(from: -100, maxSteps: 5))
+
+
+let temperatures = select(log.valid) {
+    $0.sensor == "TEMP"
+}
+
+let temperatureValues = values(of: temperatures)
+
+var C = 0
+
+if let result = stats(of: temperatureValues) {
+    C = runUntilStable(from: result.min).steps
+}
+
+print("C =", C)
+
+
+// MARK: Level 4
+
+func oxygenLevel(of member: CrewMember) -> Int? {
+    member.module?.oxygenTank?.level
+}
+
+
+func status(of member: CrewMember) -> String {
+    guard let oxygen = oxygenLevel(of: member) else {
+        let place = member.module?.name ?? "open space"
+        return "\(member.name): no data (\(place))"
+    }
+
+    if oxygen < 20 {
+        return "\(member.name): \(oxygen)% CRITICAL"
+    }
+
+    return "\(member.name): \(oxygen)% OK"
+}
+
+
+for member in crew {
+    print(status(of: member))
+}
+
+
+@discardableResult
+func transferOxygen(from source: inout Int,
+                    to target: inout Int,
+                    amount: Int) -> Int {
+
+    if amount < 0 {
+        return 0
+    }
+
+    var transfer = amount
+
+    if transfer > source {
+        transfer = source
+    }
+
+    if target + transfer > 100 {
+        transfer = 100 - target
+    }
+
+    source -= transfer
+    target += transfer
+
+    return transfer
+}
+
+
+if let labTank = lab.oxygenTank,
+   let habTank = hab.oxygenTank {
+
+    print("Before:", labTank.level, habTank.level)
+
+    transferOxygen(
+        from: &labTank.level,
+        to: &habTank.level,
+        amount: 30
+    )
+
+    print("After:", labTank.level, habTank.level)
+}
+
+var D = 0
+
+if let tank = hab.oxygenTank {
+    D = tank.level
+}
+
+print("D =", D)
+
+
+func evacuationOrder(_ names: String...,
+                     roster: [String: CrewMember]) -> [String] {
+
+    var members: [CrewMember] = []
+
+    for name in names {
+        guard let member = roster[name] else {
+            print("Unknown crew member: \(name)")
+            continue
+        }
+
+        members.append(member)
+    }
+
+    members.sort {
+        $0.priority < $1.priority
+    }
+
+    var result: [String] = []
+
+    for member in members {
+        result.append(member.name)
+    }
+
+    return result
+}
+
+
+print(
+    evacuationOrder(
+        "Dana",
+        "Ghost",
+        "Aigerim",
+        "Timur",
+        roster: roster
+    )
+)
+
+
+// MARK: Level 5
+
+// Old reportOxygen can crash when module or oxygenTank is nil.
+
+func reportOxygen(for member: CrewMember) -> String {
+    guard let oxygen = oxygenLevel(of: member) else {
+        return "\(member.name): no data"
+    }
+
+    return "\(member.name): \(oxygen)%"
+}
+
+
+// Old firstCritical can crash because of !.
+// It also finds the last critical member instead of the first one.
+
+func firstCritical(in crew: [CrewMember]) -> String? {
+    for member in crew {
+        if let oxygen = oxygenLevel(of: member) {
+            if oxygen < 20 {
+                return member.name
+            }
+        }
+    }
+
+    return nil
+}
+
+print(reportOxygen(for: crew[0]))
+print(reportOxygen(for: crew[1]))
+print(firstCritical(in: crew) ?? "No critical crew")
+
+
+// Test for the logic problem
+
+let test1 = Module(name: "Test1", oxygenTank: Tank(level: 10))
+let test2 = Module(name: "Test2", oxygenTank: Tank(level: 5))
+
+let testCrew = [
+    CrewMember(name: "First", role: "Test", priority: 1, module: test1),
+    CrewMember(name: "Second", role: "Test", priority: 2, module: test2)
+]
+
+print("First critical test:", firstCritical(in: testCrew) ?? "none")
+
+
+// MARK: Finale
+
+let launchCode = "\(A)-\(B)-\(C)-\(D)"
+print("LAUNCH CODE: \(launchCode)")
